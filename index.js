@@ -1,0 +1,110 @@
+// const express = require('express')
+// const app = express()
+// const dotenv = require('dotenv')
+// const cors = require('cors')
+// dotenv.config()
+// const port = 8001
+// const http = require('http');
+// const { Server } = require('socket.io');
+// const bodyParser = require('body-parser')
+// const dbConnection = require('./cofig/dbConnection')
+// const userRouter = require('./routes/UserRoutes')
+// const chatRouter = require('./routes/Chatroutes')
+// app.use(bodyParser.json())
+// app.use(bodyParser.urlencoded({ extended: true }))
+
+// app.use(cors({
+//     origin: '*'
+// }))
+// app.use('/user', userRouter)
+// app.use('/message', chatRouter)
+// app.get('/',
+//     (req, res) => {
+//         res.send('Hello World!')
+//     }
+// )
+
+
+// const server = http.createServer(app);
+// const io = new Server(server, {
+//     cors: {
+//         origin: '*',
+//     }
+// });
+
+
+
+// io.on('connection', (socket) => {
+//     console.log(`New client connected: ${socket.id}`);
+
+//     socket.on('updateConfig', (data) => {
+//         console.log("Config update received:", data);
+//         // Emit to all connected clients (except sender)
+//         socket.broadcast.emit('configUpdated', data);
+//     });
+
+//     socket.on('disconnect', () => {
+//         console.log(`Client disconnected: ${socket.id}`);
+//     });
+// });
+// app.listen(
+//     port, '0.0.0.0',
+//     () => {console.log(`Server running on http://192.168.0.15:${port}`)
+//     dbConnection()
+// }
+// )
+
+const express = require('express');
+const app = express();
+const http = require('http');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const { Server } = require('socket.io');
+
+dotenv.config();
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+const port = 8001;
+
+const bodyParser = require('body-parser');
+const dbConnection = require('./cofig/dbConnection');
+const userRouter = require('./routes/UserRoutes');
+const chatRouter = require('./routes/Chatroutes');
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: '*' }));
+
+app.use('/user', userRouter);
+app.use('/message', chatRouter);
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
+
+// ✅ Socket.IO logic
+io.on('connection', (socket) => {
+    // console.log(socket)
+  console.log('A user connected:', socket.id);
+
+  socket.on('updateConfig', (data) => {
+    // broadcast the config to all other clients
+    socket.broadcast.emit('configUpdated', data);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// Start the server with both HTTP and WebSocket support
+server.listen(port, '0.0.0.0', () => {
+  console.log(`Server running on http://192.168.0.15:${port}`);
+  dbConnection();
+});
