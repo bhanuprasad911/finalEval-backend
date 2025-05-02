@@ -1,7 +1,7 @@
-const {Enduser, MissedChats} = require("../models/EndUserModels.js");
+const { Enduser, MissedChats } = require("../models/EndUserModels.js");
 const { Team } = require("../models/UserModels.js");
-const mongoose = require('mongoose')
-const ObjectId = mongoose.Types
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types;
 
 const addEnduser = async (req, res) => {
   try {
@@ -18,7 +18,7 @@ const addEnduser = async (req, res) => {
     const result = await enduser.save();
     return res.status(200).json({ data: result, status: 200 });
   } catch (err) {
-    return res.status(400).json({ message: err.message, data:err });
+    return res.status(400).json({ message: err.message, data: err });
   }
 };
 
@@ -50,29 +50,23 @@ const messagefetch = async (req, res) => {
   }
 };
 
-
-
-const memberMessagefetch = async(req,res)=>{
-  try{
-    const {id}=req.params
-    const member = await Team.findById(id)
-    const messageids=member.assigned
+const memberMessagefetch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const member = await Team.findById(id);
+    const messageids = member.assigned;
     // console.log(messageids)
-  const objectids = messageids.map(item=> item.id)
-  console.log(objectids)
-  const messages = await Enduser.find({_id:{$in:objectids }})
-  
+    const objectids = messageids.map((item) => item.id);
+    console.log(objectids);
+    const messages = await Enduser.find({ _id: { $in: objectids } });
 
-  res.status(200).json({message:'messages fetched succesfully', data:messages})
-  }catch(err){
-    res.status(400).json({message:'error fetching messages', data:err})
+    res
+      .status(200)
+      .json({ message: "messages fetched succesfully", data: messages });
+  } catch (err) {
+    res.status(400).json({ message: "error fetching messages", data: err });
   }
-}
-
-
-
-
-
+};
 
 const fetchUsers = async (req, res) => {
   try {
@@ -123,45 +117,45 @@ const assign = async (req, res) => {
   }
 };
 
-
-const updateMissed = async(req,res)=>{
-  try{
-    console.log(req)
-    const {id, date}=req.body
-    console.log(id)
-    const ticket = await Enduser.findById(id)
-    const exist = await MissedChats.findOne({day:date})
-    if(exist){
-      exist.count++
-      await exist.save()
+const updateMissed = async (req, res) => {
+  try {
+    console.log(req);
+    const { id, date } = req.body;
+    console.log(id);
+    const ticket = await Enduser.findById(id);
+    const exist = await MissedChats.findOne({ day: date });
+    if (exist) {
+      exist.count++;
+      await exist.save();
+    } else {
+      const newday = new MissedChats({
+        day: date,
+        count: 1,
+      });
+      await newday.save();
     }
-    else{
-      const newday= new MissedChats({
-        day:date,
-        count:1
-      })
-      await newday.save()
-    }
-    console.log(ticket)
-    ticket.isMissed=true
-    const result = await ticket.save()
-    res.status(200).json({message:'missed chat updated successfully', data:result})
-
-  }catch(err){
-    return res.status(500).json({message:err.message, data:err})
+    console.log(ticket);
+    ticket.isMissed = true;
+    const result = await ticket.save();
+    res
+      .status(200)
+      .json({ message: "missed chat updated successfully", data: result });
+  } catch (err) {
+    return res.status(500).json({ message: err.message, data: err });
   }
-}
+};
 
-const fetchMissed = async(req,res)=>{
-  try{
-    const data = await MissedChats.find()
-    res.status(200).json({message:'missed chat fetch successful', data:data})
-
-  }catch(err){
-    console.log(err)
-    res.status(500).json({message:err.message, data:err})
+const fetchMissed = async (req, res) => {
+  try {
+    const data = await MissedChats.find();
+    res
+      .status(200)
+      .json({ message: "missed chat fetch successful", data: data });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: err.message, data: err });
   }
-}
+};
 
 module.exports = {
   addEnduser,
@@ -172,5 +166,5 @@ module.exports = {
   assign,
   memberMessagefetch,
   updateMissed,
-  fetchMissed
+  fetchMissed,
 };
