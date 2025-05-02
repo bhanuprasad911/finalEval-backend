@@ -67,11 +67,11 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST", "PUT", 'DELETE', 'PATCH']
   }
 });
 
-const port = 8001;
+const port = process.env.PORT || 8001;
 
 const bodyParser = require('body-parser');
 const dbConnection = require('./cofig/dbConnection');
