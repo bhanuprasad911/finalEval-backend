@@ -149,6 +149,32 @@ const fetchTeammembers = async (req, res) => {
   }
 };
 
+
+const editTeammember = async (req, res) => {
+  try {
+    console.log(req)
+    const { id } = req.params;
+    const { fullname, email, phone, role } = req.body;
+
+    const edited = await Team.findByIdAndUpdate(
+      id,
+      { fullname, email, phone, role },
+      { new: true, runValidators: true }
+    );
+
+    if (!edited) {
+      return res.status(404).json({ message: "Team member not found" });
+    }
+    const result = await Team.find()
+    res.status(200).json({ message: "Edited team member successfully", data: result });
+  } catch (err) {
+    res.status(500).json({ message: "Error while editing team member", error: err.message });
+  }
+};
+
+
+
+
 const deleteMember = async (req, res) => {
   try {
     const { id } = req.body;
@@ -171,4 +197,5 @@ module.exports = {
   Addteammember,
   fetchTeammembers,
   deleteMember,
+  editTeammember
 };
